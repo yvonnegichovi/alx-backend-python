@@ -4,12 +4,13 @@ This module focuses on asyncio and await
 """
 
 import asyncio
+from typing import Any
 
 
 wait_random = __import__('0-basic_async_syntax').wait_random
 
 
-def task_wait_random(max_delay: int):
+def task_wait_random(max_delay: int) -> Any:
     """
     Creates an asyncio.Task that runs wait_random with the specified max_delay.
 
