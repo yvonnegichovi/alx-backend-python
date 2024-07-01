@@ -4,7 +4,7 @@ This module has tests
 """
 
 from parameterized import parameterized
-from utils import access_nested_map
+from utils import access_nested_map, get_json
 import unittest
 
 
@@ -36,6 +36,16 @@ class TestAccessNestedMap(unittest.TestCase):
         """
         with self.assertRaises(KeyError):
             access_nested_map(nested_map, path)
+
+
+class TestGetJson(unittest.TestCase):
+    """
+    This class is a mock HTTP calls
+    """
+    def test_get_json():
+        """
+        Tests that utils.get_json returns the expected result
+        """
 
 
 if __name__ == "__main__":
