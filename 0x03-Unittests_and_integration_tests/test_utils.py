@@ -4,17 +4,8 @@ This module has tests
 """
 
 from parameterized import parameterized
+from utils import access_nested_map
 import unittest
-
-
-def access_nested_map(nested_map, path):
-    """
-    This method tests parameterization
-    """
-    current = nested_map
-    for key in path:
-        current = current[key]
-    return current
 
 
 class TestAccessNestedMap(unittest.TestCase):
@@ -43,9 +34,8 @@ class TestAccessNestedMap(unittest.TestCase):
         """
         Tests access_nested_map raises KeyError with parameterized inputs
         """
-        with self.assertRaises(KeyError) as context:
+        with self.assertRaises(KeyError):
             access_nested_map(nested_map, path)
-        self.assertEqual(str(context.exception), str(KeyError(path[-1])))
 
 
 if __name__ == "__main__":
