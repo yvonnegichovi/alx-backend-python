@@ -4,6 +4,7 @@ This module has tests
 """
 
 from parameterized import parameterized
+from unittest.mock import patch, Mock
 from utils import access_nested_map, get_json
 import unittest
 
@@ -42,10 +43,25 @@ class TestGetJson(unittest.TestCase):
     """
     This class is a mock HTTP calls
     """
-    def test_get_json():
+    @parameterized.expand([
+        ("http://example.com", {"payload": True}),
+        ("http://holberton.io", {"payload": False}),
+    ])
+
+    @patch('utils.requests.get')
+    def test_get_json(self, test_url, test_payload, mock_get):
         """
         Tests that utils.get_json returns the expected result
         """
+        mock_response = Mock()
+        mock_response.json.return_value = test_payload
+        mock_response.return_value = mock_response
+
+        result = get_json(test_url)
+
+        mock_get.assert_called_once_with(test_url)
+
+        self.assertEqual(result, test_payload)
 
 
 if __name__ == "__main__":
