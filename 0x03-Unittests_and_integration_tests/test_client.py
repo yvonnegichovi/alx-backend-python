@@ -5,7 +5,6 @@ This module has tests
 
 from client import GithubOrgClient
 from parameterized import parameterized
-from test_utils import get_json
 from unittest.mock import patch
 import unittest
 
