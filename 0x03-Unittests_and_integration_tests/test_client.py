@@ -43,7 +43,7 @@ class TestGithubOrgClient(unittest.TestCase):
         self.assertEqual(result, "https://api.github.com/orgs/test-org/repos")
 
     @patch('client.get_json')
-    def test_public_repos(self):
+    def test_public_repos(self, mock_get_json):
         """
         This method does more patching
         """
