@@ -111,6 +111,34 @@ class MockResponse:
     def json(self):
         return self.json_data
 
+    @patch('client.get_json')
+    def test_public_repos(self, mock_get_json):
+        """
+        Test GithubOrgClient.public_repos without license argument.
+        """
+        mock_get_json.side_effect = [fixtures.org_payload, fixtures.repos_payload]
+
+        client = GithubOrgClient("google")
+        result = client.public_repos()
+
+        self.assertEqual(result, fixtures.expected_repos)
+        mock_get_json.assert_called_with("https://api.github.com/orgs/google")
+        mock_get_json.assert_called_with("https://api.github.com/orgs/google/repos")
+
+    @patch('client.get_json')
+    def test_public_repos_with_license(self, mock_get_json):
+        """
+        Test GithubOrgClient.public_repos with license="apache-2.0" argument.
+        """
+        mock_get_json.side_effect = [fixtures.org_payload, fixtures.repos_payload]
+
+        client = GithubOrgClient("google")
+        result = client.public_repos(license="apache-2.0")
+
+        self.assertEqual(result, fixtures.apache2_repos)
+        mock_get_json.assert_called_with("https://api.github.com/orgs/google")
+        mock_get_json.assert_called_with("https://api.github.com/orgs/google/repos")
+
 
 if __name__ == "__main__":
     unittest.main()
