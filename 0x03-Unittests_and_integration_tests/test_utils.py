@@ -19,7 +19,6 @@ class TestAccessNestedMap(unittest.TestCase):
         ({"a": {"b": 2}}, ("a",), {"b": 2}),
         ({"a": {"b": 2}}, ("a", "b"), 2),
     ])
-
     def test_access_nested_map(self, nested_map, path, expected):
         """
         Tests access_nested_map with parameterized inputs
@@ -30,7 +29,6 @@ class TestAccessNestedMap(unittest.TestCase):
         ({}, ("a")),
         ({"a": 1}, ("a", "b")),
     ])
-
     def test_access_nested_map_exception(self, nested_map, path):
         """
         Tests access_nested_map raises KeyError with parameterized inputs
@@ -52,7 +50,7 @@ class TestGetJson(unittest.TestCase):
             ("http://example.com", {"payload": True}),
             ("http://holberton.io", {"payload": False})
         ]
-        
+
         for test_url, test_payload in test_cases:
             mock_response = Mock()
             mock_response.json.return_value = test_payload
