@@ -31,7 +31,7 @@ class TestGithubOrgClient(unittest.TestCase):
 
 
     @patch('client.GithubOrgClient.org', new_callable=PropertyMock)
-    def test_public_repos_url():
+    def test_public_repos_url(self, mock_org):
         """
         It mocks a property
         """
