@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 This module has tests
-""" 
+"""
 
 from client import GithubOrgClient
 from parameterized import parameterized
@@ -26,21 +26,21 @@ class TestGithubOrgClient(unittest.TestCase):
         """
         client = GithubOrgClient(org_name)
         result = client.org
-        mock_get_json.assert_called_once_with(f"https://api.github.com/orgs/{org_name}")
+        mock_get_json.assert_called_once_with(
+                f"https://api.github.com/orgs/{org_name}")
         self.assertEqual(result, {"key": "value"})
-
 
     @patch('client.GithubOrgClient.org', new_callable=PropertyMock)
     def test_public_repos_url(self, mock_org):
         """
         It mocks a property
         """
-        mock_payload = {"repos_url": "https://api.github.com/orgs/test-org/repos"}
+        mock_payload = {
+                "repos_url": "https://api.github.com/orgs/test-org/repos"}
         mock_org.return_value = mock_payload
         client = GithubOrgClient("test-org")
         result = client._public_repos_url
         self.assertEqual(result, "https://api.github.com/orgs/test-org/repos")
-
 
     @patch('client.get_json')
     def test_public_repos(self):
@@ -63,5 +63,5 @@ class TestGithubOrgClient(unittest.TestCase):
                 "https://api.github.com/orgs/test-org/repos")
 
 
-        if __name__ == "__main__":
+if __name__ == "__main__":
     unittest.main()
