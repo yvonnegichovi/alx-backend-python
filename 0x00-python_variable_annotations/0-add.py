@@ -2,3 +2,6 @@
 """
 This module shows type-annotated functionalities
 """
+
+def add(a: float, b: float) -> float:
+    return a + b
