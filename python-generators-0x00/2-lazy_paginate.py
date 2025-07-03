@@ -6,9 +6,6 @@ from seed import connect_to_prodev, close_connection
 def paginate_users(page_size, offset):
     """
     Fetches a single page of user data from the database.
-    This function connects to the database, executes a LIMIT/OFFSET query,
-    fetches the results, and then closes the connection.
-    It returns a list of user dictionaries for the specified page.
     """
     connection = None
     cursor = None
@@ -38,7 +35,7 @@ def paginate_users(page_size, offset):
             close_connection(connection)
 
 
-def lazy_pagination(page_size):
+def lazy_paginate(page_size): # CHANGED NAME from lazy_pagination to lazy_paginate
     """
     Generator function to lazily load paginated data from the users database.
     It uses the paginate_users function to fetch each page only when needed.
@@ -55,8 +52,8 @@ def lazy_pagination(page_size):
         page = paginate_users(page_size, offset)
 
         if not page:
-            break # Exit the generator
+            break
 
-        yield page # Yield the entire page (a list of user dictionaries)
+        yield page
 
         offset += page_size
