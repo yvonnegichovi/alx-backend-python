@@ -1,6 +1,5 @@
 import mysql.connector
 from mysql.connector import Error
-import sys
 from seed import connect_to_prodev, close_connection
 
 def paginate_users(page_size, offset):
@@ -13,22 +12,19 @@ def paginate_users(page_size, offset):
     try:
         connection = connect_to_prodev()
         if connection is None:
-            print("Error: Could not connect to the database for pagination.", file=sys.stderr)
             return []
 
-        cursor = connection.cursor(dictionary=True)
-        cursor.execute(f"SELECT user_id, name, email, age FROM user_data LIMIT {page_size} OFFSET {offset}")
+        sql_query = "SELECT * FROM user_data LIMIT %s OFFSET %s"
+        cursor.execute(sql_query, (page_size, offset))
         rows = cursor.fetchall()
         return rows
     except Error as e:
-        print(f"Database error during paginate_users: {e}", file=sys.stderr)
         return []
     finally:
         if cursor:
             try:
                 cursor.fetchall()
             except Error as e:
-                print(f"Warning: Error consuming remaining results before closing cursor in paginate_users: {e}", file=sys.stderr)
             finally:
                 cursor.close()
         if connection:
