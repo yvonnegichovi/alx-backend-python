@@ -1,6 +1,7 @@
 import sqlite3
 import functools
 import os
+from datetime import datetime
 
 DB_NAME = 'users.db'
 
@@ -15,6 +16,8 @@ def log_queries(func):
             query = kwargs['query']
         elif args:
             query = args[0]
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        print(f"[{timestamp}] LOG: Executing query: '{query}'")
         print(f"LOG: Executing query: '{query}'")
         result = func(*args, **kwargs)
         return result
