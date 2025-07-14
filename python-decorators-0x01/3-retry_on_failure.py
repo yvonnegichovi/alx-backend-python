@@ -1,3 +1,4 @@
+import time
 import sqlite3 
 import functools
 import os
@@ -5,6 +6,8 @@ from datetime import datetime
 
 SCRIPT_DIR = os.path.dirname(__file__)
 DB_NAME = os.path.join(SCRIPT_DIR, 'users.db')
+_failure_counter = 0
+_MAX_FAILURES = 2 
 
 def with_db_connection(func):
     """
@@ -28,28 +31,30 @@ def with_db_connection(func):
                 conn.close()
     return wrapper
 
-def transactional(func):
+def retry_on_failure(retries=3, delay=2):
     """
-    Decorator that manages database transactions.
-    
-    It ensures that the decorated function's database operations are wrapped in a transaction.
-    If the functions raises an error, the transaction is rolled back; otherwise, it's commited.
-    Assumes teh first argument passed to the decorated function is a database connection object.
+    Decorator that retries the decorated function a specified number of times if it raises an exception.
+
+    Args:
+        retries (int): The maximum number of times to retry the function.
+        delay (int): The delay in seconds between retries.
     """
-    @functools.wraps(func)
-    def wrapper(conn, *args, **kwargs):
-        try:
-            conn.execute("BEGIN TRANSACTION")
-            result = func(conn, *args, **kwargs)
-            conn.commit()
-            print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] INFO: Transaction committed successful")
-            return result
-        except Exception as e:
-            if conn:
-                conn.rollback()
-                print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] ERROR: Transaction rolled back successfully")
-            raise
-    return wrapper
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            for attempt in range(1, retries + 1):
+                try:
+                    return func(*args, **kwargs)
+                except Exception as e:
+                    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    print(f"[{timestamp}] WARNING: Attempt {attempt}/{retries} for '{func.__name__}' failed: {e}")
+                    if attempt < retries:
+                        time.sleep(delay)
+                    else:
+                        print(f"[{timestamp}] ERROR: All {retries} attempts for '{func.__name__}' failed. Re-raising last exception.")
+                        raise # Re-raise the last exception after all retries are exhausted
+        return wrapper
+    return decorator
 
 def setup_database(db_name=DB_NAME):
     """
@@ -58,7 +63,6 @@ def setup_database(db_name=DB_NAME):
     """
     conn = None
     try:
-        print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] DEBUG: Setting up DB at: {db_name}") # Optional debug print
         conn = sqlite3.connect(db_name)
         cursor = conn.cursor()
         
@@ -80,10 +84,9 @@ def setup_database(db_name=DB_NAME):
             try:
                 cursor.execute("INSERT INTO users (id, name, email) VALUES (?, ?, ?)", user_data)
             except sqlite3.IntegrityError:
-                pass
+                pass # User already exists, ignore
         
         conn.commit()
-        print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] DEBUG: Database setup complete.") # Optional debug print
     except sqlite3.Error as e:
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         print(f"[{timestamp}] ERROR: Database setup error: {e}")
@@ -92,12 +95,24 @@ def setup_database(db_name=DB_NAME):
         if conn:
             conn.close()
 
+@with_db_connection
+@retry_on_failure(retries=3, delay=1)
 
-@with_db_connection 
-@transactional 
-def update_user_email(conn, user_id, new_email): 
-    cursor = conn.cursor() 
-    cursor.execute("UPDATE users SET email = ? WHERE id = ?", (new_email, user_id)) 
-#### Update user's email with automatic transaction handling 
+def fetch_users_with_retry(conn):
+    """
+    Attempts to fetch all users from the database.
+    Includes a simulated transient failure for testing the retry decorator.
+    """
+    global _failure_counter
+    
+    if _failure_counter < _MAX_FAILURES:
+        _failure_counter += 1
+        raise sqlite3.OperationalError(f"Simulated transient error on attempt {_failure_counter}")
+    
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users")
+    return cursor.fetchall()
 
-update_user_email(user_id=1, new_email='Crawford_Cartwright@hotmail.com')
+
+users = fetch_users_with_retry()
+print(users)
