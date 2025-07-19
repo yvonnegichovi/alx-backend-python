@@ -5,7 +5,8 @@ This module has tests
 
 from client import GithubOrgClient
 from parameterized import parameterized
-from unittest.mock import patch
+from unittest.mock import patch, Mock, PropertyMock
+from utils import get_json
 import fixtures
 import unittest
 
@@ -24,11 +25,20 @@ class TestGithubOrgClient(unittest.TestCase):
         """
         Test that GithubOrgClient.org returns the correct value.
         """
+        expected_payload = [{
+            "login": org_name,
+            "repos_url": f"https://api.github.com/orgs/{org_name}/repos"
+            }]
+        mock_get_json.return_value = expected_payload
+
         client = GithubOrgClient(org_name)
+
         result = client.org
-        mock_get_json.assert_called_once_with(
-                f"https://api.github.com/orgs/{org_name}")
-        self.assertEqual(result, {"key": "value"})
+
+        expected_url = f"https://api.github.com/orgs/{org_name}"
+        mock_get_json.assert_called_once_with(expected_url)
+
+        self.assertEqual(result, expected_payload)
 
     @patch('client.GithubOrgClient.org', new_callable=PropertyMock)
     def test_public_repos_url(self, mock_org):
