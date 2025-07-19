@@ -44,7 +44,7 @@ class MessageSerializer(serializers.ModelSerializer):
         }
 
 
-class ConversationSerialzer(serializers.ModelSerializer):
+class ConversationSerializer(serializers.ModelSerializer):
     """
     Serialzer for the Conversation model.
 
