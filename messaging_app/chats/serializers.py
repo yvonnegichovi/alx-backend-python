@@ -69,3 +69,19 @@ class ConversationSerialzer(serializers.ModelSerializer):
     def get_participants_usernames(self, obj):
         """Return a list of usernames for all participants."""
         return [user.username for user in obj.participants.all()]
+
+    def validate_participants(self, value):
+        """
+        Validate a conversation has at least two participants.
+
+        This demonstrates the use of serializers.ValidationError.
+        """
+        if not value:
+            raise serializers.ValidationError(
+                "A conversation must have at least one participant."
+            )
+        if len(value) < 2:
+            raise serializers.ValidationError(
+                "A conversation must have at least two participants."
+            )
+        return value
