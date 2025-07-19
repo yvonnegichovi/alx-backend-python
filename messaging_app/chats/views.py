@@ -1,6 +1,7 @@
 """Create a view set for the chat app."""
-from rest_framework import serializers, viewsets
+from rest_framework import serializers, status, viewsets
 from rest_framework.permissions import IsAuthenticated
+from django_filters.rest_framework import DjangoFilterBackend
 
 from .models import Conversation, CustomUser, Message
 from .serializers import (
