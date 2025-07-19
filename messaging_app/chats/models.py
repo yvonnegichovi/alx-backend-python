@@ -20,6 +20,11 @@ class CustomUser(AbstractUser):
         help_text="Unique UUID for the user"
     )
 
+    password = models.CharField(
+        max_length=128,
+        help_text="User's hashed password"
+    )
+
     phone_number = models.CharField(
         max_length=20,
         null=True,
