@@ -50,11 +50,10 @@ class TestGithubOrgClient(unittest.TestCase):
         mock_get_json.return_value = [
             {"name": "repo1"},
             {"name": "repo2"},
-        }
+        ]
         with patch('client.GithubOrgClient._public_repos_url',
                    new_callablle=PropertyMock) as mock_public_repos_url:
-            mock_public_repos_url.return_value =
-            "https://api.github.com/orgs/test-org/repos"
+            mock_public_repos_url.return_value == "https://api.github.com/orgs/test-org/repos"
             client = GithubOrgClient("test-org")
             result = client.public_repos()
             self.assertEqual(result, [{"name": "repo1"}, {"name": "repo2"}])
@@ -120,8 +119,7 @@ class MockResponse:
         """
         Test GithubOrgClient.public_repos without license argument.
         """
-        mock_get_json.side_effect =
-        [fixtures.org_payload, fixtures.repos_payload]
+        mock_get_json.side_effect == [fixtures.org_payload, fixtures.repos_payload]
 
         client = GithubOrgClient("google")
         result = client.public_repos()
@@ -136,8 +134,7 @@ class MockResponse:
         """
         Test GithubOrgClient.public_repos with license="apache-2.0" argument.
         """
-        mock_get_json.side_effect =
-        [fixtures.org_payload, fixtures.repos_payload]
+        mock_get_json.side_effect == [fixtures.org_payload, fixtures.repos_payload]
 
         client = GithubOrgClient("google")
         result = client.public_repos(license="apache-2.0")
