@@ -25,8 +25,8 @@ class MessageSerializer(serializers.ModelSerializer):
     Includes read-only fields for sender username and conversation ID.
     """
 
-    sender_username = serializers.ReadOnlyField(source='sender.username')
-    conversation_id = serializers.ReadOnlyField(
+    sender_username = serializers.CharField(source='sender.username')
+    conversation_id = serializers.CharField(
         source='conversation.conversation_id')
 
     class Meta:
