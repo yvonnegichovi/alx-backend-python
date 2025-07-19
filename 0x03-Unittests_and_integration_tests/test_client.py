@@ -5,7 +5,7 @@ This module has tests
 
 from client import GithubOrgClient
 from parameterized import parameterized, parameterized_class
-from fixtures import org_payload, repos_payload, expected_repos, apache2_repos
+from fixtures import TEST_PAYLOAD
 from unittest.mock import patch, Mock, PropertyMock
 from utils import get_json
 import fixtures
@@ -26,10 +26,10 @@ class TestGithubOrgClient(unittest.TestCase):
         """
         Test that GithubOrgClient.org returns the correct value.
         """
-        expected_payload = [{
+        expected_payload = {
             "login": org_name,
             "repos_url": f"https://api.github.com/orgs/{org_name}/repos"
-            }]
+            }
         mock_get_json.return_value = expected_payload
 
         client = GithubOrgClient(org_name)
@@ -48,7 +48,8 @@ class TestGithubOrgClient(unittest.TestCase):
         """
         mock_payload = {
                 "repos_url": "https://api.github.com/orgs/test-org/repos"}
-        with patch('client.GithubOrgClient.org', new_callable=PropertyMock) as mock_org:
+        with patch('client.GithubOrgClient.org',
+                   new_callable=PropertyMock) as mock_org:
             mock_org.return_value = mock_payload
 
             client = GithubOrgClient("test_org")
@@ -64,26 +65,42 @@ class TestGithubOrgClient(unittest.TestCase):
         """
         This method does more patching
         """
-        mock_get_json.return_value = [
-            {"name": "repo1"},
-            {"name": "repo2"},
+        test_repos_payload = [
+            {"name": "repo_1", "license": {"key": "mit"}},
+            {"name": "repo_2", "license": {"key": "apache-2.0"}},
+            {"name": "repo_3", "license": {"key": "gpl-3.0"}},
         ]
+        mock_get_json.return_value = test_repos_payload
+
+        test_public_repos_url = "https://api.github.com/orgs/test_org/repos"
+
         with patch('client.GithubOrgClient._public_repos_url',
-                   new_callablle=PropertyMock) as mock_public_repos_url:
-            mock_public_repos_url.return_value == "https://api.github.com/orgs/test-org/repos"
-            client = GithubOrgClient("test-org")
-            result = client.public_repos()
-            self.assertEqual(result, [{"name": "repo1"}, {"name": "repo2"}])
+                   new_callable=PropertyMock) as mock_public_repos_url:
+            mock_public_repos_url.return_value = test_public_repos_url
+
+            client = GithubOrgClient("test_org")
+
+            repos = client.public_repos()
+
+            self.assertEqual(repos, ["repo_1", "repo_2", "repo_3"])
+
             mock_public_repos_url.assert_called_once()
-            mock_get_json.assert_called_once_with(
-                "https://api.github.com/orgs/test-org/repos")
+
+            mock_get_json.assert_called_once()
+
+            repos_with_license = client.public_repos(license="apache-2.0")
+            self.assertEqual(repos_with_license, ["repo_2"])
+            mock_public_repos_url.assert_called_once()
+            mock_get_json.assert_called_once()
 
 
 @parameterized_class([
-    {"org_payload": fixtures.org_payload,
-        "repos_payload": fixtures.repos_payload,
-        "expected_repos": fixtures.expected_repos,
-        "apache2_repos": fixtures.apache2_repos}
+    {
+        "org_payload": TEST_PAYLOAD[0][0],
+        "repos_payload": TEST_PAYLOAD[0][1],
+        "expected_repos": TEST_PAYLOAD[0][2],
+        "apache2_repos": TEST_PAYLOAD[0][3]
+    }
 ])
 class TestIntegrationGithubOrgClient(unittest.TestCase):
     """
@@ -136,7 +153,10 @@ class MockResponse:
         """
         Test GithubOrgClient.public_repos without license argument.
         """
-        mock_get_json.side_effect == [fixtures.org_payload, fixtures.repos_payload]
+        mock_get_json.side_effect = [
+                Mock(json=Mock(return_value=fixtures.org_payload)),
+                Mock(json=Mock(return_value=fixtures.repos_payload))
+        ]
 
         client = GithubOrgClient("google")
         result = client.public_repos()
@@ -151,7 +171,10 @@ class MockResponse:
         """
         Test GithubOrgClient.public_repos with license="apache-2.0" argument.
         """
-        mock_get_json.side_effect == [fixtures.org_payload, fixtures.repos_payload]
+        mock_get_json.side_effect = [
+                Mock(json=Mock(return_value=fixtures.org_payload)),
+                Mock(json=Mock(return_value=fixtures.repos_payload))
+        ]
 
         client = GithubOrgClient("google")
         result = client.public_repos(license="apache-2.0")
