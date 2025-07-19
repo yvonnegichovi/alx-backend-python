@@ -13,7 +13,7 @@ from django.utils import timezone
 class CustomUser(AbstractUser):
     """Custom User model extending Django's AbstractUser."""
 
-    user_uuid = models.UUIDField(
+    user_id = models.UUIDField(
         default=uuid.uuid4,
         unique=True,
         editable=False,
