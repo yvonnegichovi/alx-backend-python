@@ -141,6 +141,10 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
 class MockResponse:
     """
     Mock response for requests.get.
+    
+    This class simulates a simplified HTTP response object that
+    has a .json() method, which is commonly called on responses
+    from the 'requests' library.
     """
     def __init__(self, json_data):
         self.json_data = json_data
