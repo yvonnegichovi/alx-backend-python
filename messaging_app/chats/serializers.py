@@ -4,7 +4,7 @@ from rest_framework import serializers
 from .models import Conversation, CustomUser, Message
 
 
-class CustomUserSerializer(serializers.modelSerializer):
+class CustomUserSerializer(serializers.ModelSerializer):
     """Serializer for the CustomUser model."""
 
     class Meta:
